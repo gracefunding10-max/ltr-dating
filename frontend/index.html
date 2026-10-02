@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#ff4d79" />
+<title>LTR DATING — Find Your Long-Term Match</title>
+<style>
+  /* [Same beautiful CSS as before — copy from previous response] */
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html, body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+  body { background: linear-gradient(160deg,#1a0b2e 0%,#2d1b4e 50%,#1a0b2e 100%); color:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  #app { width:100%; max-width:430px; height:100vh; max-height:900px; position:relative; overflow:hidden; background: linear-gradient(180deg,#2a0f3e 0%,#1a0b2e 100%); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  @media (min-width:500px) { #app { border-radius:36px; height:92vh; } }
+  .screen { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transition: opacity .4s, transform .4s; transform: translateX(20px); }
+  .screen.active { opacity:1; pointer-events:auto; transform:translateX(0); }
+  #splash { justify-content:center; align-items:center; background: radial-gradient(circle at 50% 40%,#ff4d79 0%,#b91c7c 40%,#2a0f3e 100%); }
+  .logo { font-size:56px; font-weight:900; background: linear-gradient(135deg,#fff 0%,#ffd1dc 100%); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:-2px; }
+  .tagline { margin-top:8px; font-size:13px; opacity:.85; letter-spacing:3px; text-transform:uppercase; }
+  .btn { border:none; cursor:pointer; padding:16px 24px; border-radius:18px; font-size:16px; font-weight:600; transition: transform .2s; font-family:inherit; }
+  .btn:active { transform:scale(.96); }
+  .btn:disabled { opacity:.5; }
+  .btn-primary { background: linear-gradient(135deg,#ff4d79 0%,#b91c7c 100%); color:#fff; box-shadow: 0 10px 30px rgba(255,77,121,.4); }
+  .btn-ghost { background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.15); }
+  .btn-block { width:100%; }
+  #onboard { padding:40px 28px; justify-content:space-between; }
+  .onboard-top { text-align:center; padding-top:30px; }
+  .onboard-emoji { font-size:72px; margin-bottom:16px; }
+  .onboard-title { font-size:30px; font-weight:800; margin-bottom:12px; line-height:1.1; }
+  .onboard-sub { font-size:14px; opacity:.75; line-height:1.5; }
+  .onboard-bottom { display:flex; flex-direction:column; gap:12px; padding-bottom:30px; }
+  .privacy-note { text-align:center; font-size:12px; opacity:.6; margin-top:12px; }
+  .auth-screen { padding:40px 28px; justify-content:center; }
+  .auth-title { font-size:24px; font-weight:800; margin-bottom:8px; text-align:center; }
+  .auth-sub { font-size:13px; opacity:.7; margin-bottom:24px; text-align:center; }
+  .id-card { background: linear-gradient(135deg,rgba(255,77,121,.15),rgba(185,28,124,.15)); border:1px solid rgba(255,255,255,.15); border-radius:24px; padding:24px; width:100%; backdrop-filter: blur(20px); margin:16px 0; }
+  .id-label { font-size:11px; opacity:.7; text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+  .id-number { font-size:24px; font-weight:900; letter-spacing:2px; font-family:monospace; background: linear-gradient(135deg,#fff,#ffd1dc); -webkit-background-clip:text; background-clip:text; color:transparent; word-break:break-all; }
+  .form-group { margin-bottom:16px; }
+  .form-label { font-size:13px; opacity:.8; margin-bottom:6px; display:block; font-weight:500; }
+  .form-input, .form-textarea { width:100%; padding:14px 16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:14px; color:#fff; font-size:15px; font-family:inherit; }
+  .form-input:focus, .form-textarea:focus { outline:none; border-color:#ff4d79; }
+  .form-textarea { resize:none; min-height:80px; }
+  .chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { padding:10px 16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:20px; font-size:13px; cursor:pointer; }
+  .chip.selected { background: linear-gradient(135deg,#ff4d79,#b91c7c); border-color:transparent; }
+  .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+  .photo-slot { aspect-ratio:3/4; background:rgba(255,255,255,.05); border:2px dashed rgba(255,255,255,.15); border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; position:relative; }
+  .photo-slot.filled { border-style:solid; border-color:rgba(255,77,121,.5); }
+  .photo-slot img { width:100%; height:100%; object-fit:cover; }
+  .photo-slot .add { font-size:28px; opacity:.5; }
+  .photo-slot .remove { position:absolute; top:6px; right:6px; background:rgba(0,0,0,.6); width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; }
+  .top-bar { padding:20px 20px 12px; display:flex; align-items:center; justify-content:space-between; }
+  .brand { font-size:22px; font-weight:800; background:linear-gradient(135deg,#ff4d79,#ffd1dc); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .icon-btn, .back-btn { width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .swipe-area { flex:1; position:relative; padding:10px 20px; display:flex; align-items:center; justify-content:center; }
+  .card-stack { position:relative; width:100%; height:100%; max-width:380px; }
+  .card { position:absolute; width:100%; height:100%; border-radius:24px; overflow:hidden; background:#2a0f3e; box-shadow: 0 20px 50px rgba(0,0,0,.5); transition: transform .35s, opacity .35s; cursor:grab; touch-action:none; }
+  .card.dragging { transition:none; }
+  .card-img { width:100%; height:100%; background-size:cover; background-position:center; }
+  .card-overlay { position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.3) 40%, transparent 70%); display:flex; flex-direction:column; justify-content:flex-end; padding:24px; }
+  .card-name { font-size:28px; font-weight:800; margin-bottom:4px; }
+  .card-age { font-size:22px; font-weight:400; opacity:.9; }
+  .card-location { font-size:13px; opacity:.8; margin-bottom:8px; }
+  .card-bio { font-size:14px; opacity:.9; line-height:1.4; margin-bottom:12px; }
+  .card-tags { display:flex; flex-wrap:wrap; gap:6px; }
+  .tag { padding:5px 10px; background:rgba(255,255,255,.15); border-radius:12px; font-size:11px; }
+  .stamp { position:absolute; top:40px; padding:10px 20px; border:4px solid; border-radius:12px; font-size:32px; font-weight:900; opacity:0; pointer-events:none; }
+  .stamp-like { left:20px; color:#4ade80; border-color:#4ade80; transform:rotate(-15deg); }
+  .stamp-nope { right:20px; color:#f87171; border-color:#f87171; transform:rotate(15deg); }
+  .actions { display:flex; justify-content:center; align-items:center; gap:16px; padding:16px 20px 24px; }
+  .action-btn { width:56px; height:56px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:22px; background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.1); }
+  .action-btn:active { transform:scale(.9); }
+  .action-btn.big { width:68px; height:68px; font-size:26px; }
+  .action-btn.nope { background:rgba(248,113,113,.15); color:#f87171; }
+  .action-btn.like { background:rgba(74,222,128,.15); color:#4ade80; }
+  .action-btn.super { background:rgba(96,165,250,.15); color:#60a5fa; }
+  .bottom-nav { display:flex; justify-content:space-around; padding:10px 20px 20px; background: linear-gradient(to top, rgba(26,11,46,.95), transparent); backdrop-filter: blur(20px); border-top:1px solid rgba(255,255,255,.05); }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px; cursor:pointer; color:rgba(255,255,255,.5); background:none; border:none; font-family:inherit; }
+  .nav-item.active { color:#ff4d79; }
+  .nav-item .nav-icon { font-size:22px; }
+  .nav-item .nav-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+  .badge { position:absolute; top:-4px; right:-4px; background:#ff4d79; color:#fff; min-width:18px; height:18px; border-radius:9px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+  .scroll { flex:1; overflow-y:auto; padding-bottom:20px; scrollbar-width:none; }
+  .scroll::-webkit-scrollbar { display:none; }
+  .section-title { font-size:18px; font-weight:700; padding:0 20px; margin:14px 0; }
+  .nearby-scroll { padding:0 20px; display:flex; gap:12px; overflow-x:auto; scrollbar-width:none; }
+  .nearby-scroll::-webkit-scrollbar { display:none; }
+  .nearby-card { flex:0 0 140px; height:200px; border-radius:18px; overflow:hidden; position:relative; cursor:pointer; }
+  .nearby-card .bg { width:100%; height:100%; background-size:cover; background-position:center; }
+  .nearby-card .info { position:absolute; bottom:0; left:0; right:0; padding:10px; background: linear-gradient(to top, rgba(0,0,0,.8), transparent); }
+  .nearby-card .name { font-size:14px; font-weight:700; }
+  .nearby-card .dist { font-size:11px; opacity:.8; }
+  .online-dot { position:absolute; top:10px; right:10px; width:10px; height:10px; border-radius:50%; background:#4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.3); }
+  .list-card { margin:0 20px 12px; padding:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:16px; display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .list-avatar { width:54px; height:54px; border-radius:50%; background-size:cover; background-position:center; flex-shrink:0; }
+  .list-info { flex:1; min-width:0; }
+  .list-name { font-size:15px; font-weight:600; margin-bottom:2px; }
+  .list-sub { font-size:12px; opacity:.6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .match-modal { position:absolute; inset:0; background: radial-gradient(circle at 50% 40%, rgba(255,77,121,.4), rgba(26,11,46,.95)); backdrop-filter: blur(20px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; z-index:100; opacity:0; pointer-events:none; transition: opacity .4s; }
+  .match-modal.show { opacity:1; pointer-events:auto; }
+  .match-title { font-size:42px; font-weight:900; background: linear-gradient(135deg,#ff4d79,#ffd1dc); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:8px; }
+  .match-sub { font-size:14px; opacity:.85; margin-bottom:30px; text-align:center; }
+  .match-photos { display:flex; margin-bottom:30px; }
+  .match-photo { width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center; border:4px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .match-photo:nth-child(2) { margin-left:-30px; }
+  .match-actions { display:flex; gap:12px; width:100%; max-width:320px; }
+  .match-actions .btn { flex:1; }
+  .toast { position:absolute; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,.85); backdrop-filter:blur(20px); padding:12px 20px; border-radius:24px; font-size:13px; opacity:0; pointer-events:none; transition: all .3s; z-index:200; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .empty-state { text-align:center; padding:60px 30px; }
+  .empty-state .emoji { font-size:60px; margin-bottom:16px; }
+  .empty-state h3 { font-size:18px; margin-bottom:8px; }
+  .empty-state p { font-size:13px; opacity:.7; line-height:1.5; }
+  .recovery-box { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.3); border-radius:14px; padding:14px; margin:12px 0; font-family:monospace; font-size:12px; line-height:1.8; word-break:break-all; }
+  .loader { display:inline-block; width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="screen active" id="splash">
+    <div class="logo">LTR</div>
+    <div class="tagline">Long-Term Dating</div>
+  </div>
+
+  <div class="screen" id="onboard">
+    <div class="onboard-top">
+      <div class="onboard-emoji">💘</div>
+      <div class="onboard-title">Find your<br/>long-term match</div>
+      <div class="onboard-sub">Real people. Real connections. No phone or email required — your privacy stays yours.</div>
+    </div>
+    <div class="onboard-bottom">
+      <button class="btn btn-primary btn-block" onclick="showScreen('signup')">Create Account</button>
+      <button class="btn btn-ghost btn-block" onclick="showScreen('login')">I have an LTR ID</button>
+      <div class="privacy-note">🔒 No phone • No email • 100% private</div>
+    </div>
+  </div>
+
+  <div class="screen auth-screen" id="signup">
+    <div class="auth-title">Create your LTR ID</div>
+    <div class="auth-sub">Pick a strong password. We'll generate your private LTR ID.</div>
+    <div class="form-group">
+      <label class="form-label">Password (min 8 chars)</label>
+      <input type="password" class="form-input" id="signupPw" placeholder="••••••••"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm password</label>
+      <input type="password" class="form-input" id="signupPw2" placeholder="••••••••"/>
+    </div>
+    <button class="btn btn-primary btn-block" id="signupBtn" onclick="doSignup()">Create Account</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showScreen('onboard')">← Back</button>
+  </div>
+
+  <div class="screen auth-screen" id="welcome">
+    <div style="text-align:center;">
+      <div style="font-size:60px; margin-bottom:16px;">✨</div>
+      <div class="auth-title">Welcome to LTR DATING</div>
+      <div class="auth-sub">Save these — they're the only way to recover your account.</div>
+    </div>
+    <div class="id-card">
+      <div class="id-label">Your LTR ID</div>
+      <div class="id-number" id="welcomeId">—</div>
+    </div>
+    <div style="font-size:12px; opacity:.7; margin-bottom:16px; text-align:center;">⚠️ Save your LTR ID and password somewhere safe.</div>
+    <button class="btn btn-primary btn-block" onclick="copyWelcome()">📋 Copy LTR ID</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="goToProfileSetup()">I've saved them →</button>
+  </div>
+
+  <div class="screen auth-screen" id="login">
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Enter your LTR ID and password</div>
+    <div class="form-group">
+      <label class="form-label">LTR ID</label>
+      <input type="text" class="form-input" id="loginId" placeholder="LTR-XXXXXXXXXX"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="loginPw" placeholder="••••••••"/>
+    </div>
+    <button class="btn btn-primary btn-block" id="loginBtn" onclick="doLogin()">Log In</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="showScreen('onboard')">← Back</button>
+  </div>
+
+  <div class="screen" id="profileSetup">
+    <div class="scroll" style="padding:24px;">
+      <div style="font-size:13px; opacity:.7; margin-bottom:20px;" id="stepIndicator">Step 1 of 3</div>
+      <div class="setup-step" data-step="1">
+        <div style="font-size:24px; font-weight:700; margin-bottom:6px;">About you</div>
+        <div style="font-size:14px; opacity:.7; margin-bottom:20px;">Let's build your profile.</div>
+        <div class="form-group"><label class="form-label">First name</label><input type="text" class="form-input" id="pName" placeholder="Your name" maxlength="20"/></div>
+        <div class="form-group"><label class="form-label">Age (18+)</label><input type="number" class="form-input" id="pAge" placeholder="25" min="18" max="99"/></div>
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <div class="chip-group" id="genderChips">
+            <div class="chip" data-val="Woman">Woman</div>
+            <div class="chip" data-val="Man">Man</div>
+            <div class="chip" data-val="Non-binary">Non-binary</div>
+            <div class="chip" data-val="Other">Other</div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">About you</label><textarea class="form-textarea" id="pBio" placeholder="What are you looking for?" maxlength="500"></textarea></div>
+      </div>
+      <div class="setup-step" data-step="2" style="display:none;">
+        <div style="font-size:24px; font-weight:700; margin-bottom:6px;">Your photos</div>
+        <div style="font-size:14px; opacity:.7; margin-bottom:20px;">Up to 6 photos.</div>
+        <div class="photo-grid" id="photoGrid"></div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;"/>
+      </div>
+      <div class="setup-step" data-step="3" style="display:none;">
+        <div style="font-size:24px; font-weight:700; margin-bottom:6px;">Preferences</div>
+        <div style="font-size:14px; opacity:.7; margin-bottom:20px;">Who are you looking to meet?</div>
+        <div class="form-group">
+          <label class="form-label">Interested in</label>
+          <div class="chip-group" id="interestChips">
+            <div class="chip" data-val="Women">Women</div>
+            <div class="chip" data-val="Men">Men</div>
+            <div class="chip" data-val="Everyone">Everyone</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Looking for</label>
+          <div class="chip-group" id="lookingChips">
+            <div class="chip" data-val="Relationship">Long-term</div>
+            <div class="chip" data-val="Dating">Serious dating</div>
+            <div class="chip" data-val="Marriage">Marriage-minded</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Interests</label>
+          <div class="chip-group" id="hobbyChips">
+            <div class="chip" data-val="Travel">✈️ Travel</div>
+            <div class="chip" data-val="Music">🎵 Music</div>
+            <div class="chip" data-val="Fitness">💪 Fitness</div>
+            <div class="chip" data-val="Food">🍜 Food</div>
+            <div class="chip" data-val="Movies">🎬 Movies</div>
+            <div class="chip" data-val="Art">🎨 Art</div>
+            <div class="chip" data-val="Reading">📚 Reading</div>
+            <div class="chip" data-val="Hiking">🥾 Hiking</div>
+            <div class="chip" data-val="Coffee">☕ Coffee</div>
+            <div class="chip" data-val="Dancing">💃 Dancing</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" id="setupNext" onclick="nextStep()" style="margin-top:20px;">Continue</button>
+    </div>
+  </div>
+
+  <div class="screen" id="discover">
+    <div class="top-bar">
+      <div class="brand">LTR</div>
+      <button class="icon-btn" onclick="switchTab('nearby')">📍</button>
+    </div>
+    <div class="swipe-area"><div class="card-stack" id="cardStack"></div></div>
+    <div class="actions">
+      <button class="action-btn" onclick="undoSwipe()" title="Rewind">↺</button>
+      <button class="action-btn big nope" onclick="swipeAction('left')">✕</button>
+      <button class="action-btn super" onclick="swipeAction('super')">★</button>
+      <button class="action-btn big like" onclick="swipeAction('right')">♥</button>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><span class="nav-icon">🔥</span><span class="nav-label">Discover</span></button>
+      <button class="nav-item" data-tab="nearby" onclick="switchTab('nearby')"><span class="nav-icon">📍</span><span class="nav-label">Nearby</span></button>
+      <button class="nav-item" data-tab="matches" onclick="switchTab('matches')"><span class="nav-icon" style="position:relative;">💬<span class="badge" id="matchBadge" style="display:none;">0</span></span><span class="nav-label">Matches</span></button>
+      <button class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+    </nav>
+  </div>
+
+  <div class="screen" id="nearby">
+    <div class="top-bar">
+      <button class="back-btn" onclick="switchTab('discover')">←</button>
+      <div class="brand">Nearby</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="scroll">
+      <div class="section-title">Online now <span style="font-size:12px; opacity:.6;" id="onlineCount"></span></div>
+      <div class="nearby-scroll" id="nearbyScroll"></div>
+      <div class="section-title">People near you</div>
+      <div id="nearbyList"></div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" data-tab="discover" onclick="switchTab('discover')"><span class="nav-icon">🔥</span><span class="nav-label">Discover</span></button>
+      <button class="nav-item active" data-tab="nearby" onclick="switchTab('nearby')"><span class="nav-icon">📍</span><span class="nav-label">Nearby</span></button>
+      <button class="nav-item" data-tab="matches" onclick="switchTab('matches')"><span class="nav-icon">💬</span><span class="nav-label">Matches</span></button>
+      <button class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+    </nav>
+  </div>
+
+  <div class="screen" id="matches">
+    <div class="top-bar"><div class="brand">Matches</div></div>
+    <div class="scroll"><div class="section-title">Your Matches</div><div id="matchesList"></div></div>
+    <nav class="bottom-nav">
+      <button class="nav-item" data-tab="discover" onclick="switchTab('discover')"><span class="nav-icon">🔥</span><span class="nav-label">Discover</span></button>
+      <button class="nav-item" data-tab="nearby" onclick="switchTab('nearby')"><span class="nav-icon">📍</span><span class="nav-label">Nearby</span></button>
+      <button class="nav-item active" data-tab="matches" onclick="switchTab('matches')"><span class="nav-icon">💬</span><span class="nav-label">Matches</span></button>
+      <button class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+    </nav>
+  </div>
+
+  <div class="screen" id="profile">
+    <div class="top-bar"><div class="brand">My Profile</div><button class="icon-btn" onclick="doLogout()">⎋</button></div>
+    <div class="scroll" id="profileScroll"></div>
+    <nav class="bottom-nav">
+      <button class="nav-item" data-tab="discover" onclick="switchTab('discover')"><span class="nav-icon">🔥</span><span class="nav-label">Discover</span></button>
+      <button class="nav-item" data-tab="nearby" onclick="switchTab('nearby')"><span class="nav-icon">📍</span><span class="nav-label">Nearby</span></button>
+      <button class="nav-item" data-tab="matches" onclick="switchTab('matches')"><span class="nav-icon">💬</span><span class="nav-label">Matches</span></button>
+      <button class="nav-item active" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+    </nav>
+  </div>
+
+  <div class="match-modal" id="matchModal">
+    <div class="match-title">It's a Match!</div>
+    <div class="match-sub" id="matchSub"></div>
+    <div class="match-photos" id="matchPhotos"></div>
+    <div class="match-actions">
+      <button class="btn btn-ghost" onclick="closeMatch()">Keep Swiping</button>
+      <button class="btn btn-primary" onclick="closeMatch(); switchTab('matches');">Send Message</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+/* ============ SUPABASE CONFIG ============ */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';          // ← REPLACE
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';                         // ← REPLACE
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ============ STATE ============ */
+const state = {
+  user: null,       // Supabase auth user
+  profile: null,    // users table row
+  profiles: [],
+  currentIndex: 0,
+  currentStep: 1,
+  tempProfile: { photos: [], gender:'', interested:[], looking:[], hobbies:[] },
+  matches: []
+};
+
+/* ============ LTR ID GENERATOR ============ */
+function generateLtrId() {
+  return 'LTR-' + Math.floor(1000000000 + Math.random() * 9000000000);
+}
+
+/* ============ NAVIGATION ============ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function switchTab(tab) {
+  showScreen(tab);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  if (tab === 'discover') loadDiscover();
+  if (tab === 'nearby') loadNearby();
+  if (tab === 'matches') loadMatches();
+  if (tab === 'profile') loadMyProfile();
+}
+
+/* ============ AUTH ============ */
+async function doSignup() {
+  const pw = document.getElementById('signupPw').value;
+  const pw2 = document.getElementById('signupPw2').value;
+  if (pw.length < 8) return toast('Password must be 8+ chars');
+  if (pw !== pw2) return toast('Passwords do not match');
+
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+
+  try {
+    // Generate unique LTR ID
+    let ltrId = generateLtrId();
+    // Use LTR ID as the "email" for Supabase auth (hidden from users)
+    const fakeEmail = `${ltrId.toLowerCase()}@ltr-dating.local`;
+
+    const { data, error } = await sb.auth.signUp({
+      email: fakeEmail,
+      password: pw,
+      options: { data: { ltr_id: ltrId } }
+    });
+
+    if (error) throw error;
+
+    // Create profile row
+    const { error: pErr } = await sb.from('users').insert({
+      id: data.user.id,
+      ltr_id: ltrId,
+      name: 'New User',
+      age: 18,
+      gender: 'Other'
+    });
+    if (pErr) throw pErr;
+
+    state.user = data.user;
+    state.profile = { ltr_id: ltrId };
+    document.getElementById('welcomeId').textContent = ltrId;
+    showScreen('welcome');
+  } catch (e) {
+    toast(e.message || 'Signup failed');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+function copyWelcome() {
+  const id = document.getElementById('welcomeId').textContent;
+  navigator.clipboard?.writeText(`My LTR DATING ID: ${id}`);
+  toast('LTR ID copied! 💾');
+}
+
+async function doLogin() {
+  const ltrId = document.getElementById('loginId').value.trim().toUpperCase();
+  const pw = document.getElementById('loginPw').value;
+  if (!ltrId || !pw) return toast('Fill both fields');
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+
+  try {
+    // Look up user by LTR ID
+    const { data: profile } = await sb.from('users').select('id').eq('ltr_id', ltrId).single();
+    if (!profile) throw new Error('Invalid LTR ID');
+
+    const fakeEmail = `${ltrId.toLowerCase()}@ltr-dating.local`;
+    const { data, error } = await sb.auth.signInWithPassword({ email: fakeEmail, password: pw });
+    if (error) throw error;
+
+    state.user = data.user;
+    await loadProfile();
+
+    if (state.profile.name === 'New User') goToProfileSetup();
+    else initApp();
+  } catch (e) {
+    toast(e.message || 'Login failed');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+}
+
+async function doLogout() {
+  if (!confirm('Log out?')) return;
+  await sb.auth.signOut();
+  state.user = null; state.profile = null;
+  showScreen('onboard');
+}
+
+async function loadProfile() {
+  const { data } = await sb.from('users').select('*').eq('id', state.user.id).single();
+  state.profile = data;
+}
+
+/* ============ PROFILE SETUP ============ */
+function goToProfileSetup() {
+  state.currentStep = 1;
+  updateStep();
+  renderPhotoGrid();
+  showScreen('profileSetup');
+}
+function updateStep() {
+  document.querySelectorAll('.setup-step').forEach(s => s.style.display = 'none');
+  document.querySelector(`.setup-step[data-step="${state.currentStep}"]`).style.display = 'block';
+  document.getElementById('stepIndicator').textContent = `Step ${state.currentStep} of 3`;
+  document.getElementById('setupNext').textContent = state.currentStep === 3 ? 'Finish ✨' : 'Continue';
+}
+
+async function nextStep() {
+  if (state.currentStep === 1) {
+    const name = document.getElementById('pName').value.trim();
+    const age = parseInt(document.getElementById('pAge').value);
+    if (!name) return toast('Enter your name');
+    if (!age || age < 18) return toast('Must be 18+');
+    if (!state.tempProfile.gender) return toast('Select gender');
+    const { error } = await sb.from('users').update({
+      name, age, gender: state.tempProfile.gender, bio: document.getElementById('pBio').value
+    }).eq('id', state.user.id);
+    if (error) return toast(error.message);
+  }
+  if (state.currentStep === 2) {
+    if (state.tempProfile.photos.length === 0) return toast('Add at least one photo');
+  }
+  if (state.currentStep === 3) {
+    if (!state.tempProfile.interested.length) return toast('Select who you are interested in');
+    const { error } = await sb.from('users').update({
+      interested_in: state.tempProfile.interested,
+      looking_for: state.tempProfile.looking,
+      hobbies: state.tempProfile.hobbies
+    }).eq('id', state.user.id);
+    if (error) return toast(error.message);
+    initApp();
+    return;
+  }
+  state.currentStep++;
+  updateStep();
+}
+
+/* ============ CHIPS ============ */
+function setupChips(id, key, multi = false) {
+  document.querySelectorAll(`#${id} .chip`).forEach(c => {
+    c.onclick = () => {
+      if (multi) {
+        c.classList.toggle('selected');
+        state.tempProfile[key] = Array.from(document.querySelectorAll(`#${id} .chip.selected`)).map(x => x.dataset.val);
+      } else {
+        document.querySelectorAll(`#${id} .chip`).forEach(x => x.classList.remove('selected'));
+        c.classList.add('selected');
+        state.tempProfile[key] = [c.dataset.val];
+      }
+    };
+  });
+}
+setupChips('genderChips', 'gender');
+setupChips('interestChips', 'interested');
+setupChips('lookingChips', 'looking');
+setupChips('hobbyChips', 'hobbies', true);
+
+/* ============ PHOTOS ============ */
+function renderPhotoGrid() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'photo-slot' + (state.tempProfile.photos[i] ? ' filled' : '');
+    if (state.tempProfile.photos[i]) {
+      slot.innerHTML = `<img src="${state.tempProfile.photos[i]}"/><div class="remove" onclick="removePhoto(${i},event)">✕</div>`;
+    } else {
+      slot.innerHTML = '<div class="add">+</div>';
+      slot.onclick = () => addPhoto(i);
+    }
+    grid.appendChild(slot);
+  }
+}
+
+async function addPhoto(idx) {
+  const input = document.getElementById('photoInput');
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return toast('Max 5MB');
+    try {
+      toast('Uploading...');
+      const path = `${state.user.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await sb.storage.from('photos').upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      const { data } = sb.storage.from('photos').getPublicUrl(path);
+      state.tempProfile.photos[idx] = data.publicUrl;
+      // Save to profile
+      await sb.from('users').update({ photos: state.tempProfile.photos }).eq('id', state.user.id);
+      renderPhotoGrid();
+      toast('Photo added ✓');
+    } catch (e) { toast(e.message); }
+  };
+  input.click();
+}
+
+async function removePhoto(idx, e) {
+  e.stopPropagation();
+  state.tempProfile.photos.splice(idx, 1);
+  await sb.from('users').update({ photos: state.tempProfile.photos }).eq('id', state.user.id);
+  renderPhotoGrid();
+}
+
+/* ============ GEOLOCATION ============ */
+function requestLocation() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const point = `SRID=4326;POINT(${pos.coords.longitude} ${pos.coords.latitude})`;
+    await sb.from('users').update({ location: point }).eq('id', state.user.id);
+  }, () => toast('Enable location to see nearby people'));
+}
+
+/* ============ DISCOVER ============ */
+async function loadDiscover() {
+  try {
+    // Get my profile
+    const { data: me } = await sb.from('users').select('*').eq('id', state.user.id).single();
+
+    // Get users I haven't swiped on
+    const { data: swiped } = await sb.from('swipes').select('target_id').eq('user_id', state.user.id);
+    const swipedIds = (swiped || []).map(s => s.target_id);
+
+    // Get users I've matched with
+    const { data: matched } = await sb.from('matches')
+      .select('user1_id, user2_id')
+      .or(`user1_id.eq.${state.user.id},user2_id.eq.${state.user.id}`);
+    const matchedIds = (matched || []).flatMap(m => [m.user1_id, m.user2_id]).filter(id => id !== state.user.id);
+
+    const exclude = [state.user.id, ...swipedIds, ...matchedIds];
+
+    // Fetch candidates (basic filter — geospatial done client-side for simplicity)
+    let query = sb.from('users').select('*')
+      .neq('id', state.user.id)
+      .eq('is_banned', false)
+      .eq('show_me', true)
+      .eq('incognito', false)
+      .gte('age', me.pref_age_min)
+      .lte('age', me.pref_age_max)
+      .not('photos', 'eq', '{}')
+      .limit(30);
+
+    if (exclude.length) query = query.not('id', 'in', `(${exclude.join(',')})`);
+
+    const { data: candidates, error } = await query;
+    if (error) throw error;
+
+    // Filter by gender preference client-side
+    const filtered = (candidates || []).filter(c =>
+      me.interested_in.includes('Everyone') ||
+      me.interested_in.includes(c.gender) ||
+      me.interested_in.includes(c.gender + 's')
+    );
+
+    state.profiles = filtered.map(c => ({ ...c, distanceKm: '?' }));
+    state.currentIndex = 0;
+    renderCards();
+  } catch (e) { toast(e.message); }
+}
+
+function renderCards() {
+  const stack = document.getElementById('cardStack');
+  stack.innerHTML = '';
+  if (state.currentIndex >= state.profiles.length) {
+    stack.innerHTML = `<div class="empty-state"><div class="emoji">🌟</div><h3>No more profiles</h3><p>Check back soon!</p></div>`;
+    return;
+  }
+  const visible = Math.min(3, state.profiles.length - state.currentIndex);
+  for (let i = visible - 1; i >= 0; i--) {
+    const p = state.profiles[state.currentIndex + i];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.transform = `scale(${1 - i*0.04}) translateY(${i*8}px)`;
+    card.style.zIndex = 10 - i;
+    card.innerHTML = `
+      <div class="card-img" style="background-image:url('${p.photos[0]}')"></div>
+      <div class="card-overlay">
+        <div class="card-name">${p.name} <span class="card-age">${p.age}</span></div>
+        <div class="card-location">📍 ${p.city || 'Nearby'}</div>
+        <div class="card-bio">${p.bio || ''}</div>
+        <div class="card-tags">${(p.hobbies||[]).map(h=>`<span class="tag">${h}</span>`).join('')}</div>
+      </div>
+      <div class="stamp stamp-like">LIKE</div>
+      <div class="stamp stamp-nope">NOPE</div>
+    `;
+    if (i === 0) attachSwipe(card, p);
+    stack.appendChild(card);
+  }
+}
+
+function attachSwipe(card, profile) {
+  let startX=0, startY=0, curX=0, curY=0, dragging=false;
+  const likeStamp = card.querySelector('.stamp-like');
+  const nopeStamp = card.querySelector('.stamp-nope');
+  const onStart = e => { dragging = true; const t = e.touches ? e.touches[0] : e; startX = t.clientX; startY = t.clientY; card.classList.add('dragging'); };
+  const onMove = e => {
+    if (!dragging) return;
+    const t = e.touches ? e.touches[0] : e;
+    curX = t.clientX - startX; curY = t.clientY - startY;
+    card.style.transform = `translate(${curX}px, ${curY}px) rotate(${curX/15}deg)`;
+    likeStamp.style.opacity = Math.max(0, Math.min(1, curX/100));
+    nopeStamp.style.opacity = Math.max(0, Math.min(1, -curX/100));
+  };
+  const onEnd = () => {
+    if (!dragging) return;
+    dragging = false; card.classList.remove('dragging');
+    if (curX > 120) finishSwipe('right');
+    else if (curX < -120) finishSwipe('left');
+    else { card.style.transform = ''; likeStamp.style.opacity = 0; nopeStamp.style.opacity = 0; }
+    curX = 0; curY = 0;
+  };
+  const finishSwipe = async dir => {
+    card.style.transform = `translate(${dir==='right'?600:-600}px, 0) rotate(${dir==='right'?30:-30}deg)`;
+    card.style.opacity = '0';
+    await doSwipe(profile.id, dir);
+    setTimeout(() => { state.currentIndex++; renderCards(); }, 350);
+  };
+  card.addEventListener('touchstart', onStart, {passive:true});
+  card.addEventListener('touchmove', onMove, {passive:true});
+  card.addEventListener('touchend', onEnd);
+  card.addEventListener('mousedown', onStart);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+}
+
+async function swipeAction(dir) {
+  if (state.currentIndex >= state.profiles.length) return;
+  const p = state.profiles[state.currentIndex];
+  const topCard = document.querySelector('#cardStack .card');
+  if (!topCard) return;
+  const tx = dir === 'right' ? 600 : dir === 'left' ? -600 : 0;
+  const ty = dir === 'super' ? -800 : 0;
+  topCard.style.transform = `translate(${tx}px, ${ty}px)`;
+  topCard.style.opacity = '0';
+  const swipeDir = dir === 'super' ? 'super' : dir;
+  await doSwipe(p.id, swipeDir);
+  setTimeout(() => { state.currentIndex++; renderCards(); }, 350);
+}
+
+async function doSwipe(targetId, direction) {
+  // Record swipe
+  await sb.from('swipes').insert({ user_id: state.user.id, target_id: targetId, direction });
+
+  // Check for mutual like
+  if (direction === 'right' || direction === 'super') {
+    const { data: theyLiked } = await sb.from('swipes')
+      .select('direction')
+      .eq('user_id', targetId)
+      .eq('target_id', state.user.id)
+      .in('direction', ['right','super'])
+      .single();
+
+    if (theyLiked) {
+      // Create match
+      const { data: match } = await sb.from('matches').insert({
+        user1_id: state.user.id,
+        user2_id: targetId,
+        is_super_like: direction === 'super' || theyLiked.direction === 'super'
+      }).select().single();
+
+      if (match) {
+        const { data: them } = await sb.from('users').select('*').eq('id', targetId).single();
+        triggerMatch(state.profile, them);
+      }
+    }
+  }
+}
+
+async function undoSwipe() {
+  const { data: last } = await sb.from('swipes')
+    .select('id').eq('user_id', state.user.id).order('created_at', { ascending: false }).limit(1).single();
+  if (last) {
+    await sb.from('swipes').delete().eq('id', last.id);
+    if (state.currentIndex > 0) { state.currentIndex--; renderCards(); toast('Rewound ⏪'); }
+  }
+}
+
+/* ============ MATCH ============ */
+function triggerMatch(me, them) {
+  document.getElementById('matchSub').textContent = `You and ${them.name} liked each other 💕`;
+  document.getElementById('matchPhotos').innerHTML = `
+    <div class="match-photo" style="background-image:url('${me.photos[0]}')"></div>
+    <div class="match-photo" style="background-image:url('${them.photos[0]}')"></div>
+  `;
+  document.getElementById('matchModal').classList.add('show');
+  loadMatches();
+}
+function closeMatch() { document.getElementById('matchModal').classList.remove('show'); }
+
+/* ============ NEARBY ============ */
+async function loadNearby() {
+  try {
+    const { data } = await sb.from('users').select('*')
+      .neq('id', state.user.id).eq('is_banned', false).eq('show_me', true)
+      .not('photos', 'eq', '{}').limit(50);
+
+    const online = (data || []).filter(u => u.is_online);
+    const nearby = data || [];
+
+    document.getElementById('onlineCount').textContent = `(${online.length} online)`;
+    document.getElementById('nearbyScroll').innerHTML = online.slice(0, 10).map(p => `
+      <div class="nearby-card">
+        <div class="bg" style="background-image:url('${p.photos[0]}')"></div>
+        <div class="online-dot"></div>
+        <div class="info"><div class="name">${p.name}, ${p.age}</div><div class="dist">📍 ${p.city || 'Nearby'}</div></div>
+      </div>
+    `).join('') || '<div style="padding:20px; opacity:.6; font-size:13px;">No one online nearby</div>';
+    document.getElementById('nearbyList').innerHTML = nearby.map(p => `
+      <div class="list-card">
+        <div class="list-avatar" style="background-image:url('${p.photos[0]}')"></div>
+        <div class="list-info">
+          <div class="list-name">${p.name}, ${p.age}</div>
+          <div class="list-sub">${p.bio || 'No bio'}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { toast(e.message); }
+}
+
+/* ============ MATCHES ============ */
+async function loadMatches() {
+  try {
+    const { data } = await sb.from('matches')
+      .select('*, users!user1_id(*), users!user2_id(*)')
+      .or(`user1_id.eq.${state.user.id},user2_id.eq.${state.user.id}`)
+      .order('created_at', { ascending: false });
+
+    state.matches = (data || []).map(m => {
+      const other = m.users.length ? m.users.find(u => u.id !== state.user.id) || m.users[0] : null;
+      return { ...m, other };
+    });
+
+    const badge = document.getElementById('matchBadge');
+    if (state.matches.length > 0) { badge.style.display = 'flex'; badge.textContent = state.matches.length; }
+    else badge.style.display = 'none';
+
+    document.getElementById('matchesList').innerHTML = state.matches.length === 0
+      ? `<div class="empty-state"><div class="emoji">💬</div><h3>No matches yet</h3><p>Keep swiping!</p></div>`
+      : state.matches.map(m => `
+        <div class="list-card" onclick="openChat('${m.id}')">
+          <div class="list-avatar" style="background-image:url('${m.other?.photos?.[0] || ''}')"></div>
+          <div class="list-info">
+            <div class="list-name">${m.other?.name || 'Match'}${m.is_super_like?' ⭐':''}</div>
+            <div class="list-sub">Tap to message</div>
+          </div>
+        </div>
+      `).join('');
+  } catch (e) { toast(e.message); }
+}
+
+async function openChat(matchId) {
+  const m = state.matches.find(x => x.id === matchId);
+  if (!m) return;
+  const msg = prompt(`Message ${m.other?.name}:`);
+  if (!msg) return;
+  await sb.from('messages').insert({ match_id: matchId, from_id: state.user.id, text: msg });
+  toast('Sent ✓');
+}
+
+/* ============ MY PROFILE ============ */
+async function loadMyProfile() {
+  await loadProfile();
+  const me = state.profile;
+  document.getElementById('profileScroll').innerHTML = `
+    <div style="padding:20px;">
+      <div style="height:240px; border-radius:24px; overflow:hidden; position:relative; margin-bottom:20px; background-image:url('${me.photos[0] || ''}'); background-size:cover; background-position:center;">
+        <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,.8), transparent); display:flex; align-items:flex-end; padding:20px;">
+          <div>
+            <div style="font-size:26px; font-weight:800;">${me.name}, ${me.age}</div>
+            <div style="font-size:12px; opacity:.8; margin-top:4px;">${me.city || '📍 Location set'}</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; opacity:.6; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">About</div>
+        <div style="font-size:14px; line-height:1.5;">${me.bio || 'No bio yet'}</div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; opacity:.6; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Interests</div>
+        <div class="chip-group">${(me.hobbies||[]).map(h=>`<span class="chip selected">${h}</span>`).join('')}</div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; opacity:.6; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">LTR ID</div>
+        <div style="font-family:monospace; letter-spacing:2px; font-size:16px;">${me.ltr_id}</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="goToProfileSetup()">Edit Profile</button>
+    </div>
+  `;
+}
+
+/* ============ TOAST ============ */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============ INIT ============ */
+async function initApp() {
+  await loadProfile();
+  requestLocation();
+  switchTab('discover');
+}
+
+// Auto-login check
+setTimeout(async () => {
+  const { data } = await sb.auth.getSession();
+  if (data.session) {
+    state.user = data.session.user;
+    initApp();
+  } else {
+    showScreen('onboard');
+  }
+}, 800);
+</script>
+</body>
+</html>
